@@ -374,3 +374,23 @@ Determines PerimeterX server base URL.
         </IfModule>
 </VirtualHost>
 ```
+
+<a name="contributing"></a> Contributing
+----------------------------------------
+
+The following steps are welcome when contributing to our project.
+###Fork/Clone
+First and foremost, [Create a fork](https://guides.github.com/activities/forking/) of the repository, and clone it locally.
+Create a branch on your fork, preferably using a self descriptive branch name.
+
+###Code/Run
+Code your way out of your mess, and help improve our project by implementing missing features, adding capabilites or fixing bugs.
+
+To run the code, simply follow the steps in the [installation guide](#installation). Grab the keys from the PerimeterX Portal, and try refreshing your page several times continously. If no default behaviours have been overriden, you should see the PerimeterX block page. Solve the CAPTCHA to clean yourself and start fresh again.
+
+###Pull Request
+After you have completed the process, create a pull request to the Upstream repository. Please provide a complete and thorough description explaining the changes. Remember this code has to be read by our maintainers, so keep it simple, smart and accurate.
+
+###Thanks
+After all, you are helping us by contributing to this project, and we want to thank you for it.
+We highly appreciate your time invested in contributing to our project, and are glad to have people like you - kind helpers.
