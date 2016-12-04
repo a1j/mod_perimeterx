@@ -342,8 +342,14 @@ char *create_activity(const char *activity_type, const px_config *conf, const re
             "http_version", ctx->http_version,
             "module_version", conf->module_version);
 
+
     if (strcmp(activity_type, BLOCKED_ACTIVITY_TYPE) == 0 && ctx->uuid) {
         json_object_set_new(details, "block_uuid", json_string(ctx->uuid));
+    } else {
+        // adding decrypted cookie to page_requested activity
+        if (ctx->px_cookie) {
+            json_object_set_new(details, "px_cookie", json_string(ctx->px_cookie_decrypted));
+        }
     }
 
     // Extract all headers and jsonfy it
