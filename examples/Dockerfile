@@ -17,7 +17,7 @@ WORKDIR tmp
 RUN git clone https://github.com/PerimeterX/mod_perimeterx.git
 RUN cd mod_perimeterx && make
 
-COPY perimeterx.conf.example /etc/apache2/mods-available/perimeterx.conf
+COPY perimeterx.conf /etc/apache2/mods-available/perimeterx.conf
 RUN ln -s /etc/apache2/mods-available/perimeterx.conf /etc/apache2/mods-enabled/perimeterx.conf
 
 # Log to debug level

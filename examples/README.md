@@ -2,8 +2,10 @@
 
 #### Configure: 
 
-1. Replace ```perimeterx.conf.exaple```   configuration placeholder with real values from your PerimeterX account.
+1. Replace ```perimeterx.conf``` configuration placeholders with real values from your `PerimeterX` account.
 2. Replace `$APP_ID` placeholder inside `index.html` to your PerimeterX application Id.
+
+***All information needed can be found in PerimeterX [console](https://console.perimeterx.com/).***
 
 #### Build:
 
