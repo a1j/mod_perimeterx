@@ -3,7 +3,7 @@
 [PerimeterX](http://www.perimeterx.com) Apache Module
 ===========================================
 
-Table of Contents
+Table of Contentsa
 -----------------
 
 -   [Usage](#usage)

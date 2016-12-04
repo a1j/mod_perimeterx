@@ -1,0 +1,10 @@
+<IfModule mod_perimeterx.c>
+    CookieKey FekuuL9XWdWNbyy1FDl+ZkvMoXtJ6y6Gga15gyo8bTLmVTWqwa2XzkdRquC9E34b
+    AppID PXJWbMQarF
+    PXEnabled On
+    AuthToken eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzY29wZXMiOlsicmlza19zY29yZSIsInJlc3RfYXBpIl0sImlhdCI6MTQ2OTM3MDE2Niwic3ViIjoiUFhKV2JNUWFyRiIsImp0aSI6IjFiOGVlNDMyLTliOWEtNGQ1Yi1iNGFjLTEzZjZkMzlhMjIwZCJ9.BzIy_-tv27PU3pmEtPF6lIz8Qagm30tHTGOoak5xlrk
+   BlockingScore 30
+    ReportPageRequest On
+    Captcha On
+    CurlPoolSize 100
+</IfModule>
