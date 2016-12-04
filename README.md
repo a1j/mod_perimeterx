@@ -3,7 +3,21 @@
 [PerimeterX](http://www.perimeterx.com) Apache Module
 ===========================================
 
-Dependencies
+Table of Contents
+-----------------
+
+-   [Usage](#usage)
+  *   [Dependencies](#dependencies)
+  *   [Installation](#installation)
+  *   [Basic Usage Example](#basic-usage)
+-   [Directives](#directives)
+-   [Contributing](#contributing)
+  *   [Tests](#tests)
+
+
+<a name="Usage"></a>
+
+<a name="dependencies"></a> Dependencies
 ----------------------------------------
 - [openssl 1.0.1] (https://www.openssl.org/source/) 
 - [libcurl >= 7.19.0] (https://curl.haxx.se/docs/install.html) 
@@ -19,7 +33,7 @@ $ sudo apt-get install libcurl4-openssl-dev
 $ sudo apt-get install apache2-dev 
 ```
 
-Installation
+<a name="installation"></a>Installation
 ----------------------------------------
 ```shell
 $ git clone https://github.com/PerimeterX/mod_perimeterx.git
@@ -45,11 +59,12 @@ Loaded Modules:
  perimeterx_module (shared)
 ```
 
+<a name="directives"></a>
 ## Directives ##
 
 The directives should be under the server configuration.
 
-### `PXEnabled` ###
+### <a name="enabled"></a> `PXEnabled` ###
 **description** : Enables the PerimeterX module
 
 **required** : yes
@@ -60,7 +75,7 @@ The directives should be under the server configuration.
 
 When set to ```On``` the module will be applied on webpage requests.
 
-### `AppId` ###
+### <a name="appid"></a> `AppId` ###
 
 **description** : Unique application ID
 
@@ -70,7 +85,7 @@ When set to ```On``` the module will be applied on webpage requests.
 
 **values** : string
 
-### `CookieKey` ###
+### <a name="cookiekey"></a> `CookieKey` ###
 **description** : Cookie signing key
 
 **required** : yes
@@ -79,7 +94,7 @@ When set to ```On``` the module will be applied on webpage requests.
 
 **values** : string
 
-### `AuthToken` ###
+### <a name="authtoken"></a> `AuthToken` ###
 **description** : API authentication token
 
 **required** : yes
@@ -88,7 +103,7 @@ When set to ```On``` the module will be applied on webpage requests.
 
 **values** : string
 
-### `BlockingScore` ###
+### <a name="blockingscore"></a>`BlockingScore` ###
 **description** : Blocking score. When requests with a score equal to or higher value they will be blocked.
 
 **required** : No
@@ -97,7 +112,7 @@ When set to ```On``` the module will be applied on webpage requests.
 
 **values** : Integer between 0 and 100
 
-### `Captcha` ###
+### <a name="captcha"></a> `Captcha` ###
 
 **description** : Enable reCaptcha on the blocking page. 
 
@@ -109,7 +124,7 @@ When set to ```On``` the module will be applied on webpage requests.
 
 **values** : On | Off
 
-### `ReportPageRequest` ###
+### <a name="reportpagerequested"></a> `ReportPageRequest` ###
 
 **description** : Enables the ablity to report page requests and blocking activities to PerimeterX.
 
@@ -119,7 +134,7 @@ When set to ```On``` the module will be applied on webpage requests.
 
 **values** : On | Off
 
-### `APITimeout` ###
+### <a name="apitimeout"></a> `APITimeout` ###
 **description** : Timeout, in seconds, for API calls.
 
 **required** : No
@@ -128,7 +143,7 @@ When set to ```On``` the module will be applied on webpage requests.
 
 **values** : Integer between 0 and 3
 
-### `IPHeader` ###
+### <a name="ipheader"></a> `IPHeader` ###
 
 **description** : List of HTTP header names that contain the real client IP address. Use this feature when your server is behind a CDN.
 
@@ -144,7 +159,7 @@ When set to ```On``` the module will be applied on webpage requests.
 * If no valid IP address is found in the IP header list, the module will use [`useragent_ip`](https://httpd.apache.org/docs/2.4/developer/new_api_2_4.html) as the request IP.
 
 
-### `BlockPageURL`
+### <a name="blockpageurl"></a> `BlockPageURL`
 
 The Apache module allows you to customize your blocking page.
 
@@ -236,7 +251,7 @@ function handleCaptcha(response) {
             // after getting resopnse we want to reaload the original page requested
             var originalURL = getQueryString("url");
             var originalHost = window.location.host;
-            window.location.href = window.location.protocol + "//" +  originalHost + originalURL;
+            window.location.href = 	window.location.protocol + "//" +  originalHost + originalURL;
         }
        
        // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
@@ -261,7 +276,7 @@ function handleCaptcha(response) {
 ```
 
 
-### `CurlPoolSize` ###
+### <a name="curlpoolsize"></a> `CurlPoolSize` ###
 **description** : The number of active curl handles for each server
 
 **required** : No
@@ -276,7 +291,7 @@ function handleCaptcha(response) {
 
 
 
-### `BaseURL` ###
+### <a name="baseurl"></a> `BaseURL` ###
 **description** : PerimeterX API server URL
 
 **required** : No
@@ -287,7 +302,7 @@ function handleCaptcha(response) {
 
 Determines PerimeterX server base URL.
 
-###`SensitiveRoutes`
+### <a name="sensitiveroutes"></a> `SensitiveRoutes`
 
 **descripotion** : List of routes the Perimeterx module will always do a server-to-server call for, even if the cookie score is low and valid. 
 
@@ -300,7 +315,7 @@ Determines PerimeterX server base URL.
 **example** : `/api/checkout /users/login`
 
 
-###`PXWhitelistRoutes`
+###<a name="whitelistroutes"></a> `PXWhitelistRoutes`
 
 **descripotion** : A whitespace seperated list of paths that will not be examined by PX module. 
 
@@ -312,7 +327,7 @@ Determines PerimeterX server base URL.
 
 **example** : `/server-status /staging`
 
-### `PXWhitelistUserAgents`
+### <a name="whitelistuseragent"></a> `PXWhitelistUserAgents`
 
 **description** : A whitespace seperated list of User-Agents that will not be examined by PX module.
 
@@ -322,7 +337,7 @@ Determines PerimeterX server base URL.
 
 **values** : A backspace delimited list of strings.
 
-### `ExtensionWhitelist`
+### <a name="extensionwhitelist"></a> `ExtensionWhitelist`
 
 **description** : A whitespace seperated list of file extensions that will not be examined by PX module.
 
@@ -338,7 +353,7 @@ Determines PerimeterX server base URL.
 
 **example**: `.txt .css .jpeg`
 
-### Example ###
+### <a name="example"></a> Example ###
 
 * Configuration for apache server
 
