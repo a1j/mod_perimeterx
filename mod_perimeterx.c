@@ -458,6 +458,9 @@ char *create_captcha_payload(const request_context *ctx, const px_config *conf) 
     if (ctx->vid) {
         json_object_set_new(j_captcha, "vid", json_string(ctx->vid));
     }
+    if (ctx->uuid) {
+        json_object_set_new(j_captcha, "uuid", json_string(ctx->uuid));
+    }
     if (ctx->px_captcha) {
         json_object_set_new(j_captcha, "pxCaptcha", json_string(ctx->px_captcha));
     }
