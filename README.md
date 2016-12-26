@@ -314,6 +314,18 @@ Determines PerimeterX server base URL.
 
 **example** : `/api/checkout /users/login`
 
+###`SensitiveRoutesPrefix`
+
+**descripotion** : List of routes prefix. The Perimeterx module will always match request uri by this prefix list and if match was found will create a server-to-server call for, even if the cookie score is low and valid. 
+
+**required** : No
+
+**default** : Empty list
+
+**values** : A whitespace seperated list of strings.
+
+**example** : `/api /users`
+
 
 ###<a name="whitelistroutes"></a> `PXWhitelistRoutes`
 
@@ -352,6 +364,21 @@ Determines PerimeterX server base URL.
 **values** : A whitespace delimited list of strings.
 
 **example**: `.txt .css .jpeg`
+
+=======
+### `EnableBlockingByHostname`
+
+**description** : A whitespace seperated list of hostnames that PX module will enable block for.
+
+**required**: No
+
+**default** : Empty list
+    
+> **Note**: If this option is persent - only hostnames appear in this list will pass through mod_perimeterx.
+
+**values** : A whitespace delimited list of strings.
+
+**example**: `www.mysite.com www.mynewsite.com `
 
 ### <a name="example"></a> Example ###
 

@@ -153,6 +153,8 @@ typedef struct px_config_t {
     apr_array_header_t *custom_file_ext_whitelist;
     apr_array_header_t *ip_header_keys;
     apr_array_header_t *sensitive_routes;
+    apr_array_header_t *sensitive_routes_prefix;
+    apr_array_header_t *enabled_hostnames;
 } px_config;
 
 typedef enum {
@@ -247,6 +249,7 @@ typedef struct request_context_t {
     int score;
     block_reason_t block_reason;
     s2s_call_reason_t call_reason;
+    bool block_enabled;
     request_rec *r;
 } request_context;
 
@@ -832,6 +835,19 @@ const char *get_request_ip(const request_rec *r, const px_config *conf) {
     return socket_ip;
 }
 
+static bool enable_block_for_hostname(request_rec *r, apr_array_header_t *domains_list) {
+    // domains list not configured, module will be enabled globally and not per domainf
+    if (domains_list->nelts == 0) return true;
+    const char *req_hostname = r->hostname;
+    for (int i = 0; i < domains_list->nelts; i++) {
+        const char *domain = APR_ARRAY_IDX(domains_list, i, const char*);
+        if (strcmp(req_hostname, domain) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 request_context* create_context(request_rec *r, const px_config *conf) {
     request_context *ctx = (request_context*) apr_pcalloc(r->pool, sizeof(request_context));
 
@@ -904,9 +920,10 @@ request_context* create_context(request_rec *r, const px_config *conf) {
     ctx->headers = r->headers_in;
     ctx->block_reason = NO_BLOCKING;
     ctx->call_reason = NONE;
+    ctx->block_enabled = enable_block_for_hostname(r, conf->enabled_hostnames);
     ctx->r = r;
 
-    INFO(r->server, "create_context: useragent: (%s), px_cookie: (%s), full_url: (%s), hostname: (%s) , http_method: (%s), http_version: (%s), uri: (%s), ip: (%s)", ctx->useragent, ctx->px_cookie, ctx->full_url, ctx->hostname, ctx->http_method, ctx->http_version, ctx->uri, ctx->ip);
+    INFO(r->server, "create_context: useragent: (%s), px_cookie: (%s), full_url: (%s), hostname: (%s) , http_method: (%s), http_version: (%s), uri: (%s), ip: (%s), block_enabled: (%d)", ctx->useragent, ctx->px_cookie, ctx->full_url, ctx->hostname, ctx->http_method, ctx->http_version, ctx->uri, ctx->ip, ctx->block_enabled);
 
     return ctx;
 }
@@ -976,6 +993,17 @@ static bool is_sensitive_route(request_rec *r, px_config *conf) {
     return false;
 }
 
+static bool is_sensitive_route_prefix(request_rec *r, px_config *conf) {
+    apr_array_header_t *sensitive_routes_prefix = conf->sensitive_routes_prefix;
+    for (int i = 0; i < sensitive_routes_prefix->nelts; i++) {
+        char *prefix = APR_ARRAY_IDX(sensitive_routes_prefix, i, char*);
+        if (strncmp(r->uri, prefix, strlen(prefix)) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool px_verify_request(request_context *ctx, px_config *conf) {
     bool request_valid = true;
     risk_response *risk_response;
@@ -1006,7 +1034,7 @@ static bool px_verify_request(request_context *ctx, px_config *conf) {
             request_valid = ctx->score < conf->blocking_score;
             if (!request_valid) {
                 ctx->block_reason = COOKIE;
-            } else if (is_sensitive_route(ctx->r, conf)) {
+            } else if (is_sensitive_route_prefix(ctx->r, conf ) || is_sensitive_route(ctx->r, conf)) {
                 ctx->call_reason = SENSITIVE_ROUTE;
                 risk_response = risk_api_get(ctx, conf);
                 goto handle_response;
@@ -1106,7 +1134,7 @@ int px_handle_request(request_rec *r, px_config *conf) {
         bool request_valid = px_verify_request(ctx, conf);
         apr_table_set(r->subprocess_env, "SCORE", apr_itoa(r->pool, ctx->score));
 
-        if (!request_valid) {
+        if (!request_valid && ctx->block_enabled) {
             if (strcmp(r->method, "POST") == 0) {
                 return HTTP_FORBIDDEN;
             }
@@ -1340,6 +1368,26 @@ static const char *add_sensitive_route(cmd_parms *cmd, void *config, const char 
     return NULL;
 }
 
+static const char *add_sensitive_route_prefix(cmd_parms *cmd, void *config, const char *route_prefix) {
+    px_config *conf = get_config(cmd, config);
+    if (!conf) {
+        return ERROR_CONFIG_MISSING;
+    }
+    const char** entry = apr_array_push(conf->sensitive_routes_prefix);
+    *entry = route_prefix;
+    return NULL;
+}
+
+static const char *add_host_to_list(cmd_parms *cmd, void *config, const char *domain) {
+    px_config *conf = get_config(cmd, config);
+    if (!conf) {
+        return ERROR_CONFIG_MISSING;
+    }
+    const char** entry = apr_array_push(conf->enabled_hostnames);
+    *entry = domain;
+    return NULL;
+}
+
 static int px_hook_post_request(request_rec *r) {
     px_config *conf = ap_get_module_config(r->server->module_config, &perimeterx_module);
     return px_handle_request(r, conf);
@@ -1357,7 +1405,7 @@ static void *create_config(apr_pool_t *p) {
         conf->send_page_activities = false;
         conf->blocking_score = 70;
         conf->captcha_enabled = false;
-        conf->module_version = "Apache Module v1.0.8";
+        conf->module_version = "Apache Module v1.0.10-RC";
         conf->curl_pool_size = 40;
         conf->routes_whitelist = apr_array_make(p, 0, sizeof(char*));
         conf->useragents_whitelist = apr_array_make(p, 0, sizeof(char*));
@@ -1366,6 +1414,8 @@ static void *create_config(apr_pool_t *p) {
         conf->ip_header_keys = apr_array_make(p, 0, sizeof(char*));
         conf->block_page_url = NULL;
         conf->sensitive_routes = apr_array_make(p, 0, sizeof(char*));
+        conf->enabled_hostnames = apr_array_make(p, 0, sizeof(char*));
+        conf->sensitive_routes_prefix = apr_array_make(p, 0, sizeof(char*));
     }
     return conf;
 }
@@ -1451,6 +1501,16 @@ static const command_rec px_directives[] = {
             NULL,
             OR_ALL,
             "Sensitive routes - for each of this uris the module will do a server-to-server call even if a good cookie is on the request"),
+    AP_INIT_ITERATE("SensitiveRoutesPrefix",
+            add_sensitive_route_prefix,
+            NULL,
+            OR_ALL,
+            "Sensitive routes by prefix - for each of this uris prefix the module will do a server-to-server call even if a good cookie is on the request"),
+    AP_INIT_ITERATE("EnableBlockingByHostname",
+            add_host_to_list,
+            NULL,
+            OR_ALL,
+            "Enable blocking by hostname - list of hostnames on which PX module will be enabled for"),
     { NULL }
 };
 
