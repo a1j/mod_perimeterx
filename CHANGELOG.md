@@ -13,3 +13,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Base server url from: `https://sapi.perimeterx.net ` to `https://sapi-${app_id}.glb1.perimeterx.net `
+
+## [1.0.9] - 12-26-2016
+### Added
+
+- Enable module block mode per request hostname.
+- Allow prefix match for seneitive page configuration.
+
+### Changed
+- Base server url from: `https://sapi.perimeterx.net ` to `https://sapi-${app_id}.glb1.perimeterx.net `
